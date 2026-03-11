@@ -93,7 +93,7 @@ export default function App() {
       <header className={`header${scrolled ? ' header--scrolled' : ''}`} id="header">
         <div className="header__container">
           <a href="#" className="header__logo">
-            <img src="imagenes/LOGO HQR PNG.png" alt="HQR Ingeniería" width="140" height="48" />
+            <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="140" height="48" />
           </a>
           <nav className={`header__nav${menuOpen ? ' open' : ''}`} id="nav">
             <ul className="header__menu">
@@ -366,7 +366,7 @@ export default function App() {
         <div className="container">
           <div className="footer__grid">
             <div className="footer__brand">
-              <img src="imagenes/LOGO HQR PNG.png" alt="HQR Ingeniería" width="120" height="41" className="footer__logo" />
+              <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="120" height="41" className="footer__logo" />
               <p className="footer__tagline">Soluciones de ingeniería multidisciplinaria con los más altos estándares de calidad y tecnología BIM.</p>
               <div className="footer__social">
                 <a href="#" aria-label="LinkedIn" className="footer__social-link">
