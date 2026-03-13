@@ -13,7 +13,12 @@
     "type": "git",
     "url": "git+https://github.com/ignaispunk/proyectopaginaweb.git"
   },
-  "keywords": ["ingenieria", "bim", "react", "hqr"],
+  "keywords": [
+    "ingenieria",
+    "bim",
+    "react",
+    "hqr"
+  ],
   "author": "HQR Ingeniería",
   "license": "ISC",
   "bugs": {
@@ -22,7 +27,8 @@
   "homepage": "https://github.com/ignaispunk/proyectopaginaweb#readme",
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.2",

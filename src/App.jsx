@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 
 // ─── SVG Icon helpers ───
 const CheckIcon = () => (
@@ -13,16 +14,48 @@ const SendIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
 )
 
-export default function App() {
+// ─── Service data (shared between nav and pages) ───
+const servicios = [
+  {
+    slug: 'ingenieria-conceptual',
+    title: 'Ingeniería Conceptual',
+    desc: 'Estudios de factibilidad y definición de alcances para proyectos mineros e industriales. Representan el 15-20% de nuestros proyectos.',
+    fullDesc: 'En HQR Ingeniería, nuestra práctica de Ingeniería Conceptual establece las bases técnicas y económicas que determinan la viabilidad de cada proyecto. Trabajamos con nuestros clientes desde las etapas más tempranas para definir alcances, evaluar alternativas y establecer los parámetros fundamentales que guiarán el desarrollo del proyecto.',
+    items: ['Estudios de prefactibilidad', 'Análisis de alternativas', 'Estimación de costos Clase V-III', 'Diagramas de flujo de proceso'],
+    extraItems: ['Definición de alcance preliminar', 'Layout general de planta', 'Evaluación de riesgos técnicos', 'Cronograma maestro preliminar'],
+    icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 12 18.469a3.374 3.374 0 0 0-.535-1.82l-.548-.547z"/></svg>,
+    color: 'var(--color-primary)',
+  },
+  {
+    slug: 'ingenieria-basica',
+    title: 'Ingeniería Básica',
+    desc: 'Desarrollo de especificaciones técnicas y diseños preliminares. Representa el 30-35% de nuestros proyectos.',
+    fullDesc: 'Nuestra Ingeniería Básica transforma los conceptos aprobados en documentación técnica detallada que sirve como base para la ingeniería de detalles y la construcción. Definimos las especificaciones, parámetros de diseño y criterios que aseguran la integridad técnica del proyecto.',
+    items: ['Especificaciones técnicas', 'Planos de disposición general', 'Listado de equipos principales', 'Estimación de costos Clase II'],
+    extraItems: ['Diagramas P&ID', 'Criterios de diseño por disciplina', 'Filosofía de operación y control', 'Plan de ejecución del proyecto'],
+    featured: true,
+    icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>,
+    color: 'var(--color-secondary)',
+  },
+  {
+    slug: 'ingenieria-de-detalles',
+    title: 'Ingeniería de Detalles',
+    desc: 'Documentación completa para construcción y fabricación. Nuestro servicio principal, representando el 45-55% de los proyectos.',
+    fullDesc: 'La Ingeniería de Detalles es nuestro servicio insignia. Generamos toda la documentación técnica necesaria para la construcción, fabricación y montaje de proyectos industriales. Cada entregable cumple con los más altos estándares de calidad y precisión técnica, respaldados por nuestra certificación ISO 9001:2015.',
+    items: ['Planos de construcción y montaje', 'Modelos 3D detallados (BIM)', 'Memorias de cálculo', 'Listas de materiales y cubicaciones'],
+    extraItems: ['Isométricos de piping', 'Planos de fabricación', 'Especificaciones de montaje', 'Documentación As-Built'],
+    icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+    color: 'var(--color-primary)',
+  },
+]
+
+// ─── Shared Layout (Header + Footer) ───
+function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [formData, setFormData] = useState({ nombre: '', email: '', telefono: '', mensaje: '' })
-  const [formErrors, setFormErrors] = useState({})
-  const [formSending, setFormSending] = useState(false)
-  const [formSuccess, setFormSuccess] = useState(false)
-  const animRefs = useRef([])
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const location = useLocation()
 
-  // Sticky header
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -30,8 +63,140 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Scroll animations
   useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+  }, [menuOpen])
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  const isHome = location.pathname === '/'
+  const navigate = useNavigate()
+
+  const scrollToSection = useCallback((sectionId) => {
+    setMenuOpen(false)
+    if (isHome) {
+      const el = document.getElementById(sectionId)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      navigate('/')
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [isHome, navigate])
+
+  const SectionLink = ({ id, children, className }) => (
+    <a href={`#${id}`} className={className} onClick={(e) => { e.preventDefault(); scrollToSection(id) }}>{children}</a>
+  )
+
+  return (
+    <>
+      <header className={`header${scrolled ? ' header--scrolled' : ''}`} id="header">
+        <div className="header__container">
+          <Link to="/" className="header__logo">
+            <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="140" height="48" />
+          </Link>
+          <nav className={`header__nav${menuOpen ? ' open' : ''}`} id="nav">
+            <ul className="header__menu">
+              <li><SectionLink id="nosotros" className="header__link">Nosotros</SectionLink></li>
+              <li className={`header__dropdown${dropdownOpen ? ' open' : ''}`}
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                <button
+                  className="header__link header__link--has-dropdown"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-expanded={dropdownOpen}
+                >
+                  Servicios
+                </button>
+                <ul className="header__dropdown-menu">
+                  {servicios.map((s) => (
+                    <li key={s.slug}>
+                      <Link to={`/${s.slug}`} className="header__dropdown-link" onClick={() => { setMenuOpen(false); setDropdownOpen(false) }}>
+                        {s.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+              <li><SectionLink id="bim" className="header__link">Tecnología BIM</SectionLink></li>
+              <li><SectionLink id="proyectos" className="header__link">Proyectos</SectionLink></li>
+              <li><SectionLink id="certificaciones" className="header__link">Certificaciones</SectionLink></li>
+              <li><SectionLink id="contacto" className="header__link header__link--cta">Contacto</SectionLink></li>
+            </ul>
+          </nav>
+          <button className={`header__burger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú" aria-expanded={menuOpen}>
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </header>
+
+      <div className={`nav-overlay${menuOpen ? ' visible' : ''}`} onClick={() => setMenuOpen(false)} />
+
+      {children}
+
+      <footer className="footer">
+        <div className="container">
+          <div className="footer__grid">
+            <div className="footer__brand">
+              <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="120" height="41" className="footer__logo" />
+              <p className="footer__tagline">Ingeniería especializada para la industria minera con metodología BIM y tecnología Autodesk Construction Cloud.</p>
+              <div className="footer__social">
+                <a href="#" aria-label="LinkedIn" className="footer__social-link">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+                <a href="#" aria-label="Instagram" className="footer__social-link">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+            <div className="footer__links">
+              <h4 className="footer__heading">Enlaces Rápidos</h4>
+              <ul>
+                <li><SectionLink id="nosotros">Nosotros</SectionLink></li>
+                <li><Link to="/ingenieria-conceptual">Ing. Conceptual</Link></li>
+                <li><Link to="/ingenieria-basica">Ing. Básica</Link></li>
+                <li><Link to="/ingenieria-de-detalles">Ing. de Detalles</Link></li>
+                <li><SectionLink id="bim">Tecnología BIM</SectionLink></li>
+                <li><SectionLink id="contacto">Contacto</SectionLink></li>
+              </ul>
+            </div>
+            <div className="footer__contact">
+              <h4 className="footer__heading">Contacto</h4>
+              <ul>
+                <li>Santiago, Chile</li>
+                <li>+56 2 2345 6789</li>
+                <li>contacto@hqringenieria.cl</li>
+                <li>Lun – Vie: 08:00 – 18:00</li>
+              </ul>
+            </div>
+          </div>
+          <div className="footer__bottom">
+            <p>&copy; 2026 HQR Ingeniería. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </>
+  )
+}
+
+// ─── Scroll animation hook ───
+function useScrollAnimations() {
+  const animRefs = useRef([])
+
+  useEffect(() => {
+    animRefs.current = animRefs.current.filter(Boolean)
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -47,22 +212,21 @@ export default function App() {
     return () => observer.disconnect()
   }, [])
 
-  // Close menu on Escape
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [])
-
-  // Lock body scroll when menu open
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : ''
-  }, [menuOpen])
-
-  let animIndex = 0
   const animRef = (el) => {
     if (el && !animRefs.current.includes(el)) animRefs.current.push(el)
   }
+
+  return animRef
+}
+
+// ─── Home Page ───
+function HomePage() {
+  const animRef = useScrollAnimations()
+  const [formData, setFormData] = useState({ nombre: '', email: '', telefono: '', mensaje: '' })
+  const [formErrors, setFormErrors] = useState({})
+  const [formSending, setFormSending] = useState(false)
+  const [formSuccess, setFormSuccess] = useState(false)
+  const videoRef = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -89,32 +253,20 @@ export default function App() {
 
   return (
     <>
-      {/* HEADER */}
-      <header className={`header${scrolled ? ' header--scrolled' : ''}`} id="header">
-        <div className="header__container">
-          <a href="#" className="header__logo">
-            <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="140" height="48" />
-          </a>
-          <nav className={`header__nav${menuOpen ? ' open' : ''}`} id="nav">
-            <ul className="header__menu">
-              {['nosotros', 'servicios', 'bim', 'proyectos', 'certificaciones'].map((s) => (
-                <li key={s}><a href={`#${s}`} className="header__link" onClick={() => setMenuOpen(false)}>{s === 'bim' ? 'Tecnología BIM' : s.charAt(0).toUpperCase() + s.slice(1)}</a></li>
-              ))}
-              <li><a href="#contacto" className="header__link header__link--cta" onClick={() => setMenuOpen(false)}>Contacto</a></li>
-            </ul>
-          </nav>
-          <button className={`header__burger${menuOpen ? ' active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú" aria-expanded={menuOpen}>
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile overlay */}
-      <div className={`nav-overlay${menuOpen ? ' visible' : ''}`} onClick={() => setMenuOpen(false)} />
-
       {/* HERO */}
       <section className="hero" id="hero">
-        <div className="hero__bg" aria-hidden="true"></div>
+        <video
+          ref={videoRef}
+          className="hero__video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        >
+          <source src={`${import.meta.env.BASE_URL}videos/Video Header.mp4`} type="video/mp4" />
+        </video>
         <div className="hero__overlay" aria-hidden="true"></div>
         <div className="hero__grid-pattern" aria-hidden="true"></div>
         <div className="hero__content">
@@ -128,8 +280,8 @@ export default function App() {
             metodología BIM, optimizando costos y garantizando eficiencia, calidad y seguridad.
           </p>
           <div className="hero__actions anim-fade-up" ref={animRef} style={{'--delay': '.36s'}}>
-            <a href="#servicios" className="btn btn--primary">Nuestros Servicios <ArrowIcon /></a>
-            <a href="#contacto" className="btn btn--outline">Contáctanos</a>
+            <a href="#contacto" className="btn btn--primary" onClick={(e) => { e.preventDefault(); document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' }) }}>Contáctanos <ArrowIcon /></a>
+            <Link to="/ingenieria-conceptual" className="btn btn--outline">Nuestros Servicios</Link>
           </div>
         </div>
         <div className="hero__scroll-indicator anim-fade-up" ref={animRef} style={{'--delay': '.6s'}}>
@@ -171,36 +323,6 @@ export default function App() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICIOS */}
-      <section className="section servicios" id="servicios">
-        <div className="container">
-          <div className="section__header anim-fade-up" ref={animRef}>
-            <span className="section__label">Lo Que Hacemos</span>
-            <h2 className="section__title">Servicios de Ingeniería <span className="text-accent">Integral</span></h2>
-            <p className="section__desc">Ofrecemos un espectro completo de servicios de ingeniería, desde la conceptualización hasta el detalle ejecutivo.</p>
-          </div>
-          <div className="servicios__grid">
-            {[
-              { title: 'Ingeniería Conceptual', desc: 'Estudios de factibilidad y definición de alcances para proyectos mineros e industriales. Representan el 15-20% de nuestros proyectos.', items: ['Estudios de prefactibilidad', 'Análisis de alternativas', 'Estimación de costos Clase V-III', 'Diagramas de flujo de proceso'], icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 12 18.469a3.374 3.374 0 0 0-.535-1.82l-.548-.547z"/></svg> },
-              { title: 'Ingeniería Básica', desc: 'Desarrollo de especificaciones técnicas y diseños preliminares. Representa el 30-35% de nuestros proyectos.', items: ['Especificaciones técnicas', 'Planos de disposición general', 'Listado de equipos principales', 'Estimación de costos Clase II'], featured: true, icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg> },
-              { title: 'Ingeniería de Detalles', desc: 'Documentación completa para construcción y fabricación. Nuestro servicio principal, representando el 45-55% de los proyectos.', items: ['Planos de construcción y montaje', 'Modelos 3D detallados (BIM)', 'Memorias de cálculo', 'Listas de materiales y cubicaciones'], icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-            ].map((svc, i) => (
-              <div key={svc.title} className={`servicio-card${svc.featured ? ' servicio-card--featured' : ''} anim-fade-up`} ref={animRef} style={{'--delay': `${(i + 1) * 0.1}s`}}>
-                {svc.featured && <div className="servicio-card__badge">Más Solicitado</div>}
-                <div className="servicio-card__icon-wrap">{svc.icon}</div>
-                <h3 className="servicio-card__title">{svc.title}</h3>
-                <p className="servicio-card__desc">{svc.desc}</p>
-                <ul className="servicio-card__list">
-                  {svc.items.map((item) => (
-                    <li key={item}><CheckIcon /> {item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -257,15 +379,16 @@ export default function App() {
           </div>
           <div className="proyectos__grid">
             {[
-              { tag: 'Minería No Metálica', title: 'Proyectos de Litio — SQM', desc: 'Ingeniería multidisciplinaria para proyectos Greenfield y Brownfield de extracción y procesamiento avanzado de litio en el Salar de Atacama.', grad: 'linear-gradient(135deg, #5466A8 0%, #3b4a87 50%, #2d3a6b 100%)' },
-              { tag: 'Minería Metálica', title: 'Planta de Pellets — CMP', desc: 'Proyectos de mejoras operacionales en planta de Pellets para minería metálica en el Valle del Huasco.', grad: 'linear-gradient(135deg, #3DA242 0%, #2d7a32 50%, #1f5a23 100%)' },
-              { tag: 'Industrial', title: 'Puerto de Descarga — Interacid', desc: 'Ingeniería para proyectos industriales en puerto de descarga de ácido sulfúrico en Mejillones.', grad: 'linear-gradient(135deg, #5466A8 0%, #6b5fa8 50%, #7a58a8 100%)' },
+              { tag: 'Minería No Metálica', title: 'Proyectos de Litio — SQM', desc: 'Ingeniería multidisciplinaria para proyectos Greenfield y Brownfield de extracción y procesamiento avanzado de litio en el Salar de Atacama.', img: 'imagenes/1035_RenderAI.png' },
+              { tag: 'Minería Metálica', title: 'Planta de Pellets — CMP', desc: 'Proyectos de mejoras operacionales en planta de Pellets para minería metálica en el Valle del Huasco.', img: 'imagenes/1051_RenderIAv2.png' },
+              { tag: 'Industrial', title: 'Puerto de Descarga — Interacid', desc: 'Ingeniería para proyectos industriales en puerto de descarga de ácido sulfúrico en Mejillones.', img: 'imagenes/1054.v4.renderIA.png' },
               { tag: 'Mecánica', title: 'Diseño de Plantas', desc: 'Diseño de lay-outs de planta, sistemas mecánicos y especificaciones técnicas de equipos industriales.', grad: 'linear-gradient(135deg, #3DA242 0%, #3d8ba2 50%, #3d6ea2 100%)' },
               { tag: 'Eléctrica', title: 'Sistemas de Potencia', desc: 'Diseño de redes de distribución eléctrica y sistemas de control en media y baja tensión para instalaciones industriales.', grad: 'linear-gradient(135deg, #4a5a9a 0%, #5466A8 50%, #6878b8 100%)' },
               { tag: 'Piping', title: 'Sistemas de Cañerías', desc: 'Diseño de sistemas de distribución de fluidos, especificaciones técnicas para cañerías y válvulas en proyectos mineros.', grad: 'linear-gradient(135deg, #3DA242 0%, #5ba23d 50%, #7aa23d 100%)' },
             ].map((proj, i) => (
               <div key={proj.title} className="proyecto-card anim-fade-up" ref={animRef} style={{'--delay': `${0.1 + i * 0.05}s`}}>
-                <div className="proyecto-card__visual" style={{'--grad': proj.grad}}>
+                <div className="proyecto-card__visual" style={proj.img ? {} : {'--grad': proj.grad}}>
+                  {proj.img && <img src={`${import.meta.env.BASE_URL}${proj.img}`} alt={proj.title} className="proyecto-card__img" />}
                   <span className="proyecto-card__tag">{proj.tag}</span>
                 </div>
                 <div className="proyecto-card__body">
@@ -288,15 +411,24 @@ export default function App() {
           </div>
           <div className="cert__grid">
             {[
-              { title: 'ISO 9001:2015', desc: 'Sistema de Gestión de Calidad', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> },
+              { title: 'ISO 9001:2015', desc: 'Sistema de Gestión de Calidad', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>, pdfUrl: 'archivos/01 10007 2532223_Main_ES.pdf', sealImg: 'imagenes/TR-Testmark_9000039190_ES_CMYK_with-QR-Code.png' },
               { title: 'ISO 45001:2018', desc: 'Seguridad y Salud en el Trabajo', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
               { title: 'ISO 14001:2015', desc: 'Gestión Ambiental', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
               { title: 'BIM Level 2', desc: 'Metodología BIM con Autodesk Construction Cloud', icon: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
             ].map((cert, i) => (
               <div key={cert.title} className="cert-card anim-fade-up" ref={animRef} style={{'--delay': `${0.1 + i * 0.05}s`}}>
-                <div className="cert-card__icon">{cert.icon}</div>
+                {cert.sealImg
+                  ? <img src={`${import.meta.env.BASE_URL}${cert.sealImg}`} alt="Sello certificación ISO 9001" className="cert-card__seal" />
+                  : <div className="cert-card__icon">{cert.icon}</div>
+                }
                 <h3 className="cert-card__title">{cert.title}</h3>
                 <p className="cert-card__desc">{cert.desc}</p>
+                {cert.pdfUrl && (
+                  <a href={`${import.meta.env.BASE_URL}${cert.pdfUrl}`} target="_blank" rel="noopener noreferrer" className="cert-card__pdf-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
+                    Ver Certificado PDF
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -362,49 +494,101 @@ export default function App() {
           </div>
         </div>
       </section>
+    </>
+  )
+}
 
-      {/* FOOTER */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer__grid">
-            <div className="footer__brand">
-              <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" width="120" height="41" className="footer__logo" />
-              <p className="footer__tagline">Ingeniería especializada para la industria minera con metodología BIM y tecnología Autodesk Construction Cloud.</p>
-              <div className="footer__social">
-                <a href="#" aria-label="LinkedIn" className="footer__social-link">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                </a>
-                <a href="#" aria-label="Instagram" className="footer__social-link">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-                </a>
-              </div>
-            </div>
-            <div className="footer__links">
-              <h4 className="footer__heading">Enlaces Rápidos</h4>
-              <ul>
-                <li><a href="#nosotros">Nosotros</a></li>
-                <li><a href="#servicios">Servicios</a></li>
-                <li><a href="#bim">Tecnología BIM</a></li>
-                <li><a href="#proyectos">Proyectos</a></li>
-                <li><a href="#certificaciones">Certificaciones</a></li>
-                <li><a href="#contacto">Contacto</a></li>
-              </ul>
-            </div>
-            <div className="footer__contact">
-              <h4 className="footer__heading">Contacto</h4>
-              <ul>
-                <li>Santiago, Chile</li>
-                <li>+56 2 2345 6789</li>
-                <li>contacto@hqringenieria.cl</li>
-                <li>Lun – Vie: 08:00 – 18:00</li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer__bottom">
-            <p>&copy; 2026 HQR Ingeniería. Todos los derechos reservados.</p>
+// ─── Service Page Component ───
+function ServicioPage({ servicio }) {
+  const animRef = useScrollAnimations()
+
+  return (
+    <>
+      {/* HERO BANNER */}
+      <section className="servicio-hero">
+        <div className="servicio-hero__bg" aria-hidden="true"></div>
+        <div className="hero__overlay" aria-hidden="true"></div>
+        <div className="hero__grid-pattern" aria-hidden="true"></div>
+        <div className="servicio-hero__content">
+          <div className="hero__tag anim-fade-up" ref={animRef}>Servicios de Ingeniería</div>
+          <h1 className="hero__title anim-fade-up" ref={animRef} style={{'--delay': '.12s'}}>
+            {servicio.title}
+          </h1>
+          <div className="servicio-hero__breadcrumb anim-fade-up" ref={animRef} style={{'--delay': '.24s'}}>
+            <Link to="/">Inicio</Link>
+            <span>/</span>
+            <span>{servicio.title}</span>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* CONTENT */}
+      <section className="section servicio-page">
+        <div className="container">
+          <div className="servicio-page__layout">
+            <div className="servicio-page__main anim-fade-up" ref={animRef}>
+              <div className="servicio-page__icon-wrap" style={{ '--svc-color': servicio.color }}>
+                {servicio.icon}
+              </div>
+              <p className="servicio-page__intro">{servicio.fullDesc}</p>
+
+              <h2 className="servicio-page__subtitle">Alcance del Servicio</h2>
+              <div className="servicio-page__items-grid">
+                <div className="servicio-page__items-col">
+                  <h3>Entregables Principales</h3>
+                  <ul className="servicio-page__list">
+                    {servicio.items.map((item) => (
+                      <li key={item}><CheckIcon /> {item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="servicio-page__items-col">
+                  <h3>Entregables Adicionales</h3>
+                  <ul className="servicio-page__list">
+                    {servicio.extraItems.map((item) => (
+                      <li key={item}><CheckIcon /> {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <aside className="servicio-page__sidebar anim-fade-up" ref={animRef} style={{'--delay': '.15s'}}>
+              <div className="servicio-page__nav-card">
+                <h3>Nuestros Servicios</h3>
+                <ul>
+                  {servicios.map((s) => (
+                    <li key={s.slug} className={s.slug === servicio.slug ? 'active' : ''}>
+                      <Link to={`/${s.slug}`}>{s.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="servicio-page__contact-card">
+                <h3>¿Necesitas este servicio?</h3>
+                <p>Contáctanos para una cotización personalizada.</p>
+                <Link to="/" className="btn btn--primary btn--full" onClick={() => setTimeout(() => document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' }), 100)}>
+                  Solicitar Cotización <ArrowIcon />
+                </Link>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
     </>
+  )
+}
+
+// ─── App with Routes ───
+export default function App() {
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        {servicios.map((s) => (
+          <Route key={s.slug} path={`/${s.slug}`} element={<ServicioPage servicio={s} />} />
+        ))}
+      </Routes>
+    </Layout>
   )
 }
