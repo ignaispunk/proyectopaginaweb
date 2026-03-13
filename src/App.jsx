@@ -132,6 +132,7 @@ function Layout({ children }) {
               </li>
               <li><SectionLink id="bim" className="header__link">Tecnología BIM</SectionLink></li>
               <li><SectionLink id="proyectos" className="header__link">Proyectos</SectionLink></li>
+              <li><SectionLink id="noticias" className="header__link">Noticias</SectionLink></li>
               <li><SectionLink id="certificaciones" className="header__link">Certificaciones</SectionLink></li>
               <li><SectionLink id="contacto" className="header__link header__link--cta">Contacto</SectionLink></li>
             </ul>
@@ -169,13 +170,14 @@ function Layout({ children }) {
                 <li><Link to="/ingenieria-basica">Ing. Básica</Link></li>
                 <li><Link to="/ingenieria-de-detalles">Ing. de Detalles</Link></li>
                 <li><SectionLink id="bim">Tecnología BIM</SectionLink></li>
+                <li><SectionLink id="noticias">Noticias</SectionLink></li>
                 <li><SectionLink id="contacto">Contacto</SectionLink></li>
               </ul>
             </div>
             <div className="footer__contact">
               <h4 className="footer__heading">Contacto</h4>
               <ul>
-                <li>Santiago, Chile</li>
+                <li>Alfredo Barros Errázuriz 1954, Of. 1010, Santiago</li>
                 <li>+56 2 2345 6789</li>
                 <li>contacto@hqringenieria.cl</li>
                 <li>Lun – Vie: 08:00 – 18:00</li>
@@ -401,6 +403,53 @@ function HomePage() {
         </div>
       </section>
 
+      {/* NOTICIAS */}
+      <section className="section noticias" id="noticias">
+        <div className="container">
+          <div className="section__header anim-fade-up" ref={animRef}>
+            <span className="section__label">Actualidad</span>
+            <h2 className="section__title">Últimas Noticias <span className="text-accent">LinkedIn</span></h2>
+            <p className="section__desc">Seguimos de cerca la actualidad del sector. Visita nuestro perfil de LinkedIn para estar al día.</p>
+          </div>
+          <div className="noticias__grid">
+            {[
+              { title: 'Ingeniería de Detalles en Planta de Litio — Salar de Atacama', date: '10 de marzo, 2026', desc: 'Completamos una nueva etapa de ingeniería multidisciplinaria para SQM en el Salar de Atacama. El proyecto involucró coordinación BIM en tiempo real con Autodesk Construction Cloud y detección de interferencias entre todas las disciplinas.', img: 'imagenes/1035_RenderAI.png' },
+              { title: 'Modelo 3D Colaborativo: Planta de Pellets — Valle del Huasco', date: '24 de febrero, 2026', desc: 'Nuestro equipo finalizó el modelo BIM centralizado para el proyecto de mejoras en la planta de Pellets de CMP. La metodología permitió reducir errores de interfaz y adelantar el cronograma de entrega de documentación técnica.', img: 'imagenes/1051_RenderIAv2.png' },
+              { title: 'Proyecto Industrial Puerto de Descarga — Mejillones', date: '8 de febrero, 2026', desc: 'HQR Ingeniería completó la ingeniería de detalles para el proyecto de descarga de ácido sulfúrico en el puerto de Mejillones para Interacid. Toda la documentación fue generada y gestionada desde Autodesk Docs con trazabilidad completa.', img: 'imagenes/1054.v4.renderIA.png' },
+            ].map((noticia, i) => (
+              <article key={noticia.title} className="li-card anim-fade-up" ref={animRef} style={{'--delay': `${0.08 * i}s`}}>
+                <div className="li-card__image">
+                  <img src={`${import.meta.env.BASE_URL}${noticia.img}`} alt={noticia.title} loading="lazy" />
+                </div>
+                <div className="li-card__body">
+                  <div className="li-card__header">
+                    <div className="li-card__avatar">
+                      <img src={`${import.meta.env.BASE_URL}imagenes/LOGO HQR PNG.png`} alt="HQR Ingeniería" />
+                    </div>
+                    <div className="li-card__meta">
+                      <span className="li-card__company">HQR Ingeniería</span>
+                      <span className="li-card__date">{noticia.date}</span>
+                    </div>
+                  </div>
+                  <p className="li-card__text">{noticia.desc}</p>
+                  <div className="li-card__divider" aria-hidden="true"></div>
+                  <a href="#" className="li-card__btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    Ver publicación
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="noticias__cta anim-fade-up" ref={animRef}>
+            <a href="https://www.linkedin.com/company/hqr-ingenieria" target="_blank" rel="noopener noreferrer" className="noticias__follow-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Seguir a HQR Ingeniería en LinkedIn
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* CERTIFICACIONES */}
       <section className="section certificaciones" id="certificaciones">
         <div className="container">
@@ -475,7 +524,7 @@ function HomePage() {
                 <h3 className="contacto__info-title">Información de Contacto</h3>
                 <div className="contacto__info-items">
                   {[
-                    { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label: 'Dirección', value: 'Santiago, Región Metropolitana, Chile' },
+                    { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label: 'Dirección', value: 'Alfredo Barros Errázuriz 1954, Of. 1010, Santiago, Chile' },
                     { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label: 'Teléfono', value: '+56 2 2345 6789' },
                     { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label: 'Email', value: 'contacto@hqringenieria.cl' },
                     { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, label: 'Horario', value: 'Lunes a Viernes: 08:00 – 18:00 hrs' },
@@ -488,6 +537,18 @@ function HomePage() {
                       </div>
                     </div>
                   ))}
+                </div>
+                <div className="contacto__map">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.0!2d-70.6167!3d-33.4372!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c5a5b0a0c0c1%3A0x0!2sAlfredo+Barros+Err%C3%A1zuriz+1954%2C+Providencia%2C+Santiago%2C+Chile!5e0!3m2!1ses!2scl!4v1700000000000"
+                    width="100%"
+                    height="200"
+                    style={{border:0, borderRadius:'8px', marginTop:'16px'}}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Ubicación HQR Ingeniería"
+                  ></iframe>
                 </div>
               </div>
             </div>
